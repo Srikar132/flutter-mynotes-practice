@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
 
 class VerifyEmailView extends StatefulWidget {
   const VerifyEmailView({super.key});
@@ -10,6 +10,9 @@ class VerifyEmailView extends StatefulWidget {
 }
 
 class _VerifyEmailViewState extends State<VerifyEmailView> {
+  // Auth service
+  late final AuthService _authService;
+
   bool _isEmailVerified = false;
   bool _canResendEmail = false;
   Timer? _timer;
@@ -18,10 +21,11 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
   @override
   void initState() {
     super.initState();
+    _authService = AuthService.firebase();
     
     // Check if email is already verified
-    _isEmailVerified = FirebaseAuth.instance.currentUser?.emailVerified ?? false;
-    
+    _isEmailVerified = _authService.currentUser?.isEmailVerified ?? false;
+
     if (!_isEmailVerified) {
       _sendVerificationEmail();
       
@@ -40,10 +44,10 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
   }
 
   Future<void> _checkEmailVerified() async {
-    await FirebaseAuth.instance.currentUser?.reload();
-    
+    await _authService.reloadUser();
+
     setState(() {
-      _isEmailVerified = FirebaseAuth.instance.currentUser?.emailVerified ?? false;
+      _isEmailVerified = _authService.currentUser?.isEmailVerified ?? false;
     });
     
     if (_isEmailVerified) {
@@ -65,8 +69,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
         _isLoading = true;
       });
 
-      final user = FirebaseAuth.instance.currentUser!;
-      await user.sendEmailVerification();
+      await _authService.sendEmailVerification();
       
       setState(() {
         _canResendEmail = false;
@@ -108,8 +111,8 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    
+    final user = _authService.currentUser;
+
     if (_isEmailVerified) {
       return const Scaffold(
         body: Center(

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mynotes/constants/routes.dart';
-import 'package:mynotes/services/auth_service.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
 import "package:mynotes/utils/ui_helpers.dart";
+import 'package:mynotes/utils/validators.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -22,7 +23,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   void initState() {
     super.initState();
-    _authService = AuthService();
+    _authService = AuthService.firebase();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
   }
@@ -62,7 +63,7 @@ class _LoginViewState extends State<LoginView> {
     });
 
     try {
-      await _authService.signInWithEmail(email, password);
+      await _authService.logIn(email: email, password: password);
 
       if (mounted) {
         showSuccessSnackBar(context, 'Welcome back! Login successful.');
@@ -73,7 +74,7 @@ class _LoginViewState extends State<LoginView> {
 
       // send email verfication if not verified
       if (_authService.currentUser != null &&
-          !_authService.currentUser!.emailVerified) {
+          !_authService.currentUser!.isEmailVerified) {
         if (mounted) {
           showErrorSnackBar(
             context,
@@ -94,35 +95,49 @@ class _LoginViewState extends State<LoginView> {
           ).pushNamedAndRemoveUntil(homeRoute, (route) => false);
         }
       }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Login failed. Please try again.';
-
-      switch (e.code) {
-        case 'user-not-found':
-          errorMessage = 'No account found with this email address.';
-          break;
-        case 'wrong-password':
-          errorMessage = 'Incorrect password. Please try again.';
-          break;
-        case 'invalid-email':
-          errorMessage = 'The email address is not valid.';
-          break;
-        case 'user-disabled':
-          errorMessage = 'This account has been disabled.';
-          break;
-        case 'too-many-requests':
-          errorMessage = 'Too many failed attempts. Please try again later.';
-          break;
-        case 'invalid-credential':
-          errorMessage =
-              'Invalid email or password. Please check your credentials.';
-          break;
-        default:
-          errorMessage = e.message ?? 'Login failed. Please try again.';
-      }
-
+    } on UserNotFoundAuthException {
       if (mounted) {
-        showErrorSnackBar(context, errorMessage);
+        showErrorSnackBar(
+          context,
+          'No user found for that email. Please register first.',
+        );
+      }
+    } on WrongPasswordAuthException {
+      if (mounted) {
+        showErrorSnackBar(context, 'Incorrect password. Please try again.');
+      }
+    } on InvalidEmailAuthException {
+      if (mounted) {
+        showErrorSnackBar(context, 'The email address is not valid.');
+      }
+    } on UserDisabledAuthException {
+      if (mounted) {
+        showErrorSnackBar(context, 'This account has been disabled.');
+      }
+    } on TooManyRequestsAuthException {
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          'Too many failed attempts. Please try again later.',
+        );
+      }
+    } on OperationNotAllowedAuthException {
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          'This operation is not allowed. Please contact support.',
+        );
+      }
+    } on GenericAuthException {
+      if (mounted) {
+        showErrorSnackBar(context, 'Authentication error. Please try again.');
+      }
+    } on NetworkErrorAuthException {
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          'Network error. Please check your internet connection and try again.',
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -156,7 +171,7 @@ class _LoginViewState extends State<LoginView> {
     }
 
     try {
-      await _authService.sendPasswordResetEmail(email: email);
+      await _authService.sendPasswordReset(toEmail: email);
 
       if (mounted) {
         showSuccessSnackBar(
@@ -164,17 +179,19 @@ class _LoginViewState extends State<LoginView> {
           'Password reset email sent. Check your inbox.',
         );
       }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Failed to send reset email.';
-
-      if (e.code == 'user-not-found') {
-        errorMessage = 'No account found with this email address.';
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'The email address is not valid.';
-      }
-
+    } on UserNotFoundAuthException {
       if (mounted) {
-        showErrorSnackBar(context, errorMessage);
+        showErrorSnackBar(
+          context,
+          'No user found for that email. Please register first.',
+        );
+      }
+    } on GenericAuthException {
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          'Failed to send password reset email. Please try again.',
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -384,7 +401,10 @@ class _LoginViewState extends State<LoginView> {
                       ? null
                       : () {
                           // Navigate to register screen
-                          Navigator.pushReplacementNamed(context, '/register');
+                          Navigator.pushReplacementNamed(
+                            context,
+                            registerRoute,
+                          );
                         },
                   child: const Text(
                     'Create Account',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mynotes/services/auth_service.dart';
+import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -14,7 +15,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
-    _authService = AuthService();
+    _authService = AuthService.firebase();
   }
 
   Future<void> _handleLogOut(BuildContext context) async {
@@ -24,7 +25,7 @@ class _HomeViewState extends State<HomeView> {
       if (mounted) {
         Navigator.of(
           context,
-        ).pushNamedAndRemoveUntil('/login', (route) => false);
+        ).pushNamedAndRemoveUntil(loginRoute, (route) => false);
       }
     } catch (e) {
       if (mounted) {
@@ -38,18 +39,13 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       appBar: AppBar(
-       
-        leadingWidth: 60, // increase leading width to give more space
         titleSpacing: 0, // reduce space between leading and title
-
         toolbarHeight: 60, // increase toolbar height
-
         leading: Container(
-          margin: const EdgeInsets.all(8),
-          height: 30,
-          width: 30,
+          margin: const EdgeInsets.all(13),
+          height: 20,
+          width: 20,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
@@ -67,12 +63,12 @@ class _HomeViewState extends State<HomeView> {
         title: Container(
           alignment: Alignment.centerLeft, // 👈 forces left alignment
           child: Text(
-            _authService.currentUser?.email ?? 'User',
+            "${_authService.currentUser?.email?.split('@').first ?? 'User'}'s Notes",
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: Theme.of(context).textTheme.bodyLarge?.color,
               fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -84,7 +80,8 @@ class _HomeViewState extends State<HomeView> {
 
             // make the menu items look better with icons and padding
             // offset: const Offset(-20, 50), // move left (-x) and down (+y)
-            position: PopupMenuPosition.under, // makes sure it opens under button
+            position:
+                PopupMenuPosition.under, // makes sure it opens under button
 
             onSelected: (value) async {
               switch (value) {
@@ -132,7 +129,11 @@ class _HomeViewState extends State<HomeView> {
           ),
         ],
       ),
-      body: Column(children: []),
+
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(children: [Text('Welcome to your notes!')]),
+      ),
     );
   }
 }

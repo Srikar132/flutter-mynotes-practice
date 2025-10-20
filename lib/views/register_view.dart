@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mynotes/constants/routes.dart';
-import 'package:mynotes/services/auth_service.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
 import "package:mynotes/utils/ui_helpers.dart";
+import 'package:mynotes/utils/validators.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -25,7 +26,7 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   void initState() {
     super.initState();
-    _authService = AuthService();
+    _authService = AuthService.firebase();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
@@ -74,7 +75,7 @@ class _RegisterViewState extends State<RegisterView> {
 
     try {
       // Attempt to create the user
-      await _authService.signUp(email: email, password: password);
+      await _authService.createUser(email: email, password: password);
 
       if (mounted) {
         showSuccessSnackBar(
@@ -83,43 +84,36 @@ class _RegisterViewState extends State<RegisterView> {
         );
       }
 
-
       // Send email verification
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          verifyEmailRoute,
-          (route) => false,
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(verifyEmailRoute, (route) => false);
+      }
+    } on WeakPasswordAuthException {
+      if (mounted) {
+        showErrorSnackBar(context, 'The password provided is too weak.');
+      }
+    } on EmailAlreadyInUseAuthException {
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          'The account already exists for that email.',
         );
       }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Registration failed. Please try again.';
-
-      switch (e.code) {
-        case 'weak-password':
-          errorMessage =
-              'The password is too weak. Please use a stronger password.';
-          break;
-        case 'email-already-in-use':
-          errorMessage = 'An account already exists for this email address.';
-          break;
-        case 'invalid-email':
-          errorMessage = 'The email address is not valid.';
-          break;
-        case 'operation-not-allowed':
-          errorMessage = 'Email/password accounts are not enabled.';
-          break;
-        default:
-          errorMessage = e.message ?? 'Registration failed. Please try again.';
-      }
-
+    } on InvalidEmailAuthException {
       if (mounted) {
-        showErrorSnackBar(context, errorMessage);
+        showErrorSnackBar(context, 'The email address is not valid.');
+      }
+    } on GenericAuthException {
+      if (mounted) {
+        showErrorSnackBar(context, 'Failed to register. Please try again.');
       }
     } catch (e) {
       if (mounted) {
         showErrorSnackBar(
           context,
-          'An unexpected error occurred. Please try again.',
+          'An error occurred during registration. Please try again.',
         );
       }
     } finally {
@@ -141,8 +135,8 @@ class _RegisterViewState extends State<RegisterView> {
           children: <Widget>[
             // Welcome Section
             const SizedBox(height: 80),
-           
-           // Icon
+
+            // Icon
             Icon(
               Icons.note_alt_outlined,
               size: 50,
@@ -152,7 +146,7 @@ class _RegisterViewState extends State<RegisterView> {
 
             const SizedBox(height: 8),
 
-                        // Title of create your account
+            // Title of create your account
             const Text(
               'Create Your Account',
               textAlign: TextAlign.center,
@@ -351,7 +345,7 @@ class _RegisterViewState extends State<RegisterView> {
                       ? null
                       : () {
                           // Navigate to login screen
-                          Navigator.pushReplacementNamed(context, '/login');
+                          Navigator.pushReplacementNamed(context, loginRoute);
                         },
                   child: const Text(
                     'Sign In',

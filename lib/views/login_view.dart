@@ -50,11 +50,11 @@ class _LoginViewState extends State<LoginView> {
     final passwordError = validatePassword(password);
 
     if (emailError != null) {
-      showErrorSnackBar(context, emailError);
+      NoteHelpers.showErrorSnackBar(context, emailError);
       return;
     }
     if (passwordError != null) {
-      showErrorSnackBar(context, passwordError);
+      NoteHelpers.showErrorSnackBar(context, passwordError);
       return;
     }
 
@@ -66,7 +66,7 @@ class _LoginViewState extends State<LoginView> {
       await _authService.logIn(email: email, password: password);
 
       if (mounted) {
-        showSuccessSnackBar(context, 'Welcome back! Login successful.');
+        NoteHelpers.showSuccessSnackBar(context, 'Welcome back! Login successful.');
       }
 
       // wait a bit here
@@ -76,7 +76,7 @@ class _LoginViewState extends State<LoginView> {
       if (_authService.currentUser != null &&
           !_authService.currentUser!.isEmailVerified) {
         if (mounted) {
-          showErrorSnackBar(
+          NoteHelpers.showErrorSnackBar(
             context,
             'Please verify your email before signing in.',
           );
@@ -97,51 +97,51 @@ class _LoginViewState extends State<LoginView> {
       }
     } on UserNotFoundAuthException {
       if (mounted) {
-        showErrorSnackBar(
+        NoteHelpers.showErrorSnackBar(
           context,
           'No user found for that email. Please register first.',
         );
       }
     } on WrongPasswordAuthException {
       if (mounted) {
-        showErrorSnackBar(context, 'Incorrect password. Please try again.');
+        NoteHelpers.showErrorSnackBar(context, 'Incorrect password. Please try again.');
       }
     } on InvalidEmailAuthException {
       if (mounted) {
-        showErrorSnackBar(context, 'The email address is not valid.');
+        NoteHelpers.showErrorSnackBar(context, 'The email address is not valid.');
       }
     } on UserDisabledAuthException {
       if (mounted) {
-        showErrorSnackBar(context, 'This account has been disabled.');
+        NoteHelpers.showErrorSnackBar(context, 'This account has been disabled.');
       }
     } on TooManyRequestsAuthException {
       if (mounted) {
-        showErrorSnackBar(
+        NoteHelpers.showErrorSnackBar(
           context,
           'Too many failed attempts. Please try again later.',
         );
       }
     } on OperationNotAllowedAuthException {
       if (mounted) {
-        showErrorSnackBar(
+        NoteHelpers.showErrorSnackBar(
           context,
           'This operation is not allowed. Please contact support.',
         );
       }
     } on GenericAuthException {
       if (mounted) {
-        showErrorSnackBar(context, 'Authentication error. Please try again.');
+        NoteHelpers.showErrorSnackBar(context, 'Authentication error. Please try again.');
       }
     } on NetworkErrorAuthException {
       if (mounted) {
-        showErrorSnackBar(
+        NoteHelpers.showErrorSnackBar(
           context,
           'Network error. Please check your internet connection and try again.',
         );
       }
     } catch (e) {
       if (mounted) {
-        showErrorSnackBar(
+        NoteHelpers.showErrorSnackBar(
           context,
           'An unexpected error occurred. Please try again.',
         );
@@ -160,13 +160,13 @@ class _LoginViewState extends State<LoginView> {
     final email = _emailController.text.trim();
 
     if (email.isEmpty) {
-      showErrorSnackBar(context, 'Please enter your email address first.');
+      NoteHelpers.showErrorSnackBar(context, 'Please enter your email address first.');
       return;
     }
 
     final emailError = validateEmail(email);
     if (emailError != null) {
-      showErrorSnackBar(context, emailError);
+      NoteHelpers.showErrorSnackBar(context, emailError);
       return;
     }
 
@@ -174,28 +174,28 @@ class _LoginViewState extends State<LoginView> {
       await _authService.sendPasswordReset(toEmail: email);
 
       if (mounted) {
-        showSuccessSnackBar(
+        NoteHelpers.showSuccessSnackBar(
           context,
           'Password reset email sent. Check your inbox.',
         );
       }
     } on UserNotFoundAuthException {
       if (mounted) {
-        showErrorSnackBar(
+        NoteHelpers.showErrorSnackBar(
           context,
           'No user found for that email. Please register first.',
         );
       }
     } on GenericAuthException {
       if (mounted) {
-        showErrorSnackBar(
+        NoteHelpers.showErrorSnackBar(
           context,
           'Failed to send password reset email. Please try again.',
         );
       }
     } catch (e) {
       if (mounted) {
-        showErrorSnackBar(context, 'An error occurred. Please try again.');
+        NoteHelpers.showErrorSnackBar(context, 'An error occurred. Please try again.');
       }
     }
   }

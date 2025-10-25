@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/views/login_view.dart';
+import 'package:mynotes/views/notes/create_update_note_view.dart';
 import 'package:mynotes/views/register_view.dart';
 import 'package:mynotes/views/home_view.dart';
 import 'package:mynotes/views/verify_email_view.dart';
@@ -20,8 +21,8 @@ class MyNotesApp extends StatelessWidget {
     return MaterialApp(
       title: 'Notion',
       debugShowCheckedModeBanner: false,
-      theme: NotionTheme.lightTheme,
-      darkTheme: NotionTheme.darkTheme,
+      theme: NotesTheme.lightTheme,
+      darkTheme: NotesTheme.darkTheme,
       themeMode: ThemeMode.system,
       home: const FirebaseInitializationWrapper(),
       routes: {
@@ -29,6 +30,7 @@ class MyNotesApp extends StatelessWidget {
         registerRoute: (context) => const RegisterView(),
         homeRoute: (context) => const HomeView(),
         verifyEmailRoute: (context) => const VerifyEmailView(),
+        createOrUpdateNoteRoute : (context) => const CreateUpdateNoteView(),
       },
     );
   }
@@ -53,6 +55,7 @@ class FirebaseInitializationWrapper extends StatelessWidget {
           } else {
             return const HomeView();
           }
+          
         } else if (snapshot.hasError) {
           return const Scaffold(
             body: Center(child: Text("Error initializing Firebase")),

@@ -57,15 +57,15 @@ class _RegisterViewState extends State<RegisterView> {
     );
 
     if (emailError != null) {
-      showErrorSnackBar(context, emailError);
+      NoteHelpers.showErrorSnackBar(context, emailError);
       return;
     }
     if (passwordError != null) {
-      showErrorSnackBar(context, passwordError);
+      NoteHelpers.showErrorSnackBar(context, passwordError);
       return;
     }
     if (confirmPasswordError != null) {
-      showErrorSnackBar(context, confirmPasswordError);
+      NoteHelpers.showErrorSnackBar(context, confirmPasswordError);
       return;
     }
 
@@ -78,7 +78,7 @@ class _RegisterViewState extends State<RegisterView> {
       await _authService.createUser(email: email, password: password);
 
       if (mounted) {
-        showSuccessSnackBar(
+        NoteHelpers.showSuccessSnackBar(
           context,
           'Registration successful! Please verify your email.',
         );
@@ -92,26 +92,26 @@ class _RegisterViewState extends State<RegisterView> {
       }
     } on WeakPasswordAuthException {
       if (mounted) {
-        showErrorSnackBar(context, 'The password provided is too weak.');
+        NoteHelpers.showErrorSnackBar(context, 'The password provided is too weak.');
       }
     } on EmailAlreadyInUseAuthException {
       if (mounted) {
-        showErrorSnackBar(
+        NoteHelpers.showErrorSnackBar(
           context,
           'The account already exists for that email.',
         );
       }
     } on InvalidEmailAuthException {
       if (mounted) {
-        showErrorSnackBar(context, 'The email address is not valid.');
+        NoteHelpers.showErrorSnackBar(context, 'The email address is not valid.');
       }
     } on GenericAuthException {
       if (mounted) {
-        showErrorSnackBar(context, 'Failed to register. Please try again.');
+        NoteHelpers.showErrorSnackBar(context, 'Failed to register. Please try again.');
       }
     } catch (e) {
       if (mounted) {
-        showErrorSnackBar(
+        NoteHelpers.showErrorSnackBar(
           context,
           'An error occurred during registration. Please try again.',
         );

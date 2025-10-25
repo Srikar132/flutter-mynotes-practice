@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 
-class NotionTheme {
+class NotesTheme {
   // Light Theme
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
@@ -13,9 +13,7 @@ class NotionTheme {
       secondary: Color(0xFF9CA3AF), // Subtle gray for accents
       onSecondary: Colors.black,
       error: Colors.redAccent,
-      onError: Colors.white,
-      background: Color(0xFFFDFDFD), // Almost white background
-      onBackground: Color(0xFF111827), // Dark gray for text
+      onError: Colors.white, // Dark gray for text
       surface: Colors.white,
       onSurface: Color(0xFF1F2937), // Near-black for better contrast
     ),

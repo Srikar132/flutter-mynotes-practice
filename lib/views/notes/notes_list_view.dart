@@ -49,7 +49,9 @@ class NotesListView extends StatelessWidget {
               _buildIconButton(
                 context,
                 icon: Icons.arrow_forward_ios,
-                onPressed: () {},
+                onPressed: () {
+                  onTap(note);
+                },
                 iconSize: 14
               ),
 

@@ -312,6 +312,26 @@ class NotesService {
     return numberOfDeletions;
   }
 
+  // search notes
+  Future<List<DatabaseNotes>> searchNotes({
+    required  String email,
+    required String query,
+  }) async {
+    await _ensureDatabase();
+    final db = _getDatabaseOrThrow();
+
+    final user = await getUser(email: email);
+    final userId = user.id;
+
+    final result = await db.query(
+      notesTable,
+      where: 'user_id = ? AND (title LIKE ? OR text LIKE ?)',
+      whereArgs: [userId, '%$query%', '%$query%'],
+    );
+
+    return result.map((note) => DatabaseNotes.fromRow(note)).toList();
+  }
+
 
 }
 

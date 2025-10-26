@@ -5,17 +5,17 @@ import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/services/crud/notes_service.dart';
 import 'package:mynotes/utils/dialogs/log_out_dialog.dart';
+import 'package:mynotes/utils/ui_helpers.dart';
 import 'package:mynotes/views/notes/notes_list_view.dart';
-import 'package:shimmer/shimmer.dart';
 
-class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+class NotesView extends StatefulWidget {
+  const NotesView({super.key});
 
   @override
-  State<HomeView> createState() => _HomeViewState();
+  State<NotesView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _HomeViewState extends State<NotesView> {
   late final AuthService _authService;
   late final NotesService _notesService;
 
@@ -43,16 +43,15 @@ class _HomeViewState extends State<HomeView> {
       await _authService.logOut();
 
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          loginRoute,
-          (route) => false,
-        );
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(loginRoute, (route) => false);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error logging out: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error logging out: $e')));
       }
     }
   }
@@ -85,7 +84,7 @@ class _HomeViewState extends State<HomeView> {
         ),
         child: Column(
           children: [
-            _buildHeader(context),
+            // _buildHeader(context),
             _buildNotesContent(),
           ],
         ),
@@ -148,7 +147,10 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildPopupMenu() {
     return PopupMenuButton(
-      icon: const Icon(Icons.more_vert),
+      icon: const Icon(Icons.more_horiz),
+      offset: const Offset(0, 40),
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       onSelected: _handleMenuSelection,
       itemBuilder: (context) => [
         _buildPopupMenuItem(
@@ -185,24 +187,6 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text('All Notes'),
-
-        // make IconsButton's padding to zero
-        IconButton(
-          padding: EdgeInsets.zero,
-          onPressed: () {
-            Navigator.of(context).pushNamed(createOrUpdateNoteRoute);
-          },
-          icon: const Icon(Icons.add , size: 20,),
-        ),
-      ],
-    );
-  }
-
   Widget _buildNotesContent() {
     return FutureBuilder(
       future: _notesService.getOrCreateUser(email: userEmail),
@@ -210,7 +194,7 @@ class _HomeViewState extends State<HomeView> {
         if (snapshot.connectionState == ConnectionState.done) {
           return _buildNotesStream();
         }
-        return _buildLoadingShimmer();
+        return NoteHelpers.buildLoadingShimmer(context);
       },
     );
   }
@@ -224,54 +208,37 @@ class _HomeViewState extends State<HomeView> {
           case ConnectionState.waiting:
             if (snapshot.hasData) {
               final allNotes = snapshot.data as List<DatabaseNotes>;
-              
+
               if (allNotes.isEmpty) {
                 return _buildPlaceholder(
                   'No Notes are available, create your first note',
                 );
               }
-              
+
               return NotesListView(
                 notes: allNotes,
                 onTap: (note) {
-                  Navigator.of(context).pushNamed(
-                    createOrUpdateNoteRoute,
-                    arguments: note,
-                  );
+                  Navigator.of(
+                    context,
+                  ).pushNamed(createOrUpdateNoteRoute, arguments: note);
                 },
                 onDelete: (note) async {
                   await _notesService.deleteNote(id: note.id);
                 },
               );
             }
-            
-            return _buildPlaceholder(
-              'Trying to get notes from the cache of your device...',
-            );
+
+            return SizedBox.shrink();
 
           default:
-            return _buildPlaceholder(
-              'Trying to get notes from the cache of your device...',
-            );
+            return NoteHelpers.buildLoadingShimmer(context);
         }
       },
     );
   }
 
-  Widget _buildLoadingShimmer() {
-    return Shimmer.fromColors(
-      baseColor: Theme.of(context).colorScheme.secondary.withAlpha(100),
-      highlightColor: Theme.of(context).colorScheme.secondary.withAlpha(50),
-      child: Container(
-        width: double.infinity,
-        height: 30,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondary,
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    );
-  }
+
+
 
   Widget _buildPlaceholder(String title) {
     return Container(
@@ -288,3 +255,4 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 }
+

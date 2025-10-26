@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 class NoteHelpers {
   static void showErrorSnackBar(BuildContext context, String message) {
@@ -51,6 +52,21 @@ class NoteHelpers {
       ),
     );
   }
+
+  static Widget buildLoadingShimmer(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Theme.of(context).colorScheme.secondary.withAlpha(100),
+      highlightColor: Theme.of(context).colorScheme.secondary.withAlpha(50),
+      child: Container(
+        width: double.infinity,
+        height: 30,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondary,
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
 }
 
-/// ------ SnackBar Helpers ----------
+

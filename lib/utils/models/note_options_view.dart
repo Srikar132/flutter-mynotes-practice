@@ -24,11 +24,8 @@ class NoteOptionsModal extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => NoteOptionsModal(
-        note: note,
-        onEdit: onEdit,
-        onDelete: onDelete,
-      ),
+      builder: (context) =>
+          NoteOptionsModal(note: note, onEdit: onEdit, onDelete: onDelete),
     );
   }
 
@@ -57,43 +54,10 @@ class NoteOptionsModal extends StatelessWidget {
             ),
           ),
 
-          // Note preview
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  note.title == '' ? 'Untitled' : note.title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  note.text == '' ? 'No content' : note.text,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.color
-                      ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
+          _buildHeader(context, note: note),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Divider(
-              height: 10,
-              color: Colors.grey,
-            ),
-          ),
+          // Note preview
+          SizedBox(height: 4),
 
           // Options
           _buildOption(
@@ -158,6 +122,47 @@ class NoteOptionsModal extends StatelessWidget {
     );
   }
 
+  Widget _buildHeader(BuildContext context, {required DatabaseNotes note}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Row(
+        spacing: 5,
+        children: [
+          Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Theme.of(context).scaffoldBackgroundColor.withAlpha(100),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(5),
+              child: Icon(
+                Icons.note_sharp,
+                size: 20,
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                note.title == '' ? 'Untitled' : note.title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              const Text('In Private'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildOption(
     BuildContext context, {
     required IconData icon,
@@ -173,7 +178,7 @@ class NoteOptionsModal extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 24,
+              size: 20,
               color: isDestructive
                   ? Colors.red
                   : Theme.of(context).iconTheme.color,
@@ -182,10 +187,10 @@ class NoteOptionsModal extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: isDestructive
-                        ? Colors.red
-                        : Theme.of(context).textTheme.bodyLarge?.color,
-                  ),
+                color: isDestructive
+                    ? Colors.red
+                    : Theme.of(context).textTheme.bodyLarge?.color,
+              ),
             ),
           ],
         ),
@@ -193,32 +198,33 @@ class NoteOptionsModal extends StatelessWidget {
     );
   }
 
-  void _shareNote(BuildContext context)async  {
-    final content = '${note.title == '' ? 'Untitled' : note.title}\n\n${note.text == '' ? 'No content' : note.text}';
+  void _shareNote(BuildContext context) async {
+    final content =
+        '${note.title == '' ? 'Untitled' : note.title}\n\n${note.text == '' ? 'No content' : note.text}';
     await Share.share(content);
   }
 
   void _copyToClipboard(BuildContext context) {
     // Implement copy to clipboard
-    // 
+    //
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Note copied to clipboard')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Note copied to clipboard')));
   }
 
   void _pinNote(BuildContext context) {
     // Implement pin functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Note pinned')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Note pinned')));
   }
 
   void _archiveNote(BuildContext context) {
     // Implement archive functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Note archived')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Note archived')));
   }
 
   void _showDeleteConfirmation(BuildContext context) {
